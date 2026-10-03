@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>WOG-517 WebView test</title>
+  <style>
+    body { font: 17px -apple-system, system-ui, sans-serif; margin: 0; padding: 24px 20px; line-height: 1.5; color: #1b1b1b; background: #f6f7f5; }
+    h3 { margin: 0 0 4px; }
+    p.sub { margin: 0 0 20px; color: #667; font-size: 14px; }
+    a.case { display: block; padding: 16px 18px; margin: 0 0 12px; background: #fff; border: 1px solid #e2e5e0; border-radius: 12px; text-decoration: none; color: #0a5c2e; }
+    a.case b { color: #1b1b1b; }
+    .tag { display: inline-block; font-size: 12px; font-weight: 600; padding: 2px 8px; border-radius: 6px; margin-right: 8px; }
+    .no  { background: #e6f4ea; color: #137333; }   /* очікуємо: БЕЗ алерта */
+    .stay{ background: #e8f0fe; color: #1a56c4; }    /* очікуємо: лишається */
+    .open{ background: #fef3e0; color: #9a5b00; }    /* очікуємо: відкриє зовні/app */
+    small { color: #889; }
+  </style>
+</head>
+<body>
+  <h3>WOG-517 · WebView routing test</h3>
+  <p class="sub">Дивись консоль: <code>WEBVIEW_FAIL → …</code>. Для eject-кейсів алерта бути НЕ має.</p>
+
+  <a class="case" href="https://t.me/telegram">
+    <span class="tag open">зовні</span><b>1. external http (t.me)</b><br>
+    <small>→ Safari / Telegram, isCancel=true, БЕЗ алерта</small>
+  </a>
+
+  <a class="case" href="tel:+380441234567">
+    <span class="tag open">app</span><b>2a. tel:</b><br>
+    <small>→ дзвонилка, БЕЗ алерта</small>
+  </a>
+
+  <a class="case" href="mailto:test@wog.ua?subject=WOG-517">
+    <span class="tag open">app</span><b>2b. mailto:@wog.ua</b><br>
+    <small>→ пошта (НЕ webview — перевірка host-матчу), БЕЗ алерта</small>
+  </a>
+
+  <a class="case" href="viber://chat?number=%2B380441234567">
+    <span class="tag open">app</span><b>2c. viber://</b><br>
+    <small>→ Viber (схема поза LSApplicationQueriesSchemes), БЕЗ алерта</small>
+  </a>
+
+  <a class="case" href="https://www.instagram.com/wog_ukraine/" target="_blank">
+    <span class="tag open">_blank</span><b>3. target=_blank</b><br>
+    <small>→ має відкритись (WKUIDelegate), БЕЗ «тиші»</small>
+  </a>
+
+  <a class="case" href="https://wog.ua/">
+    <span class="tag stay">внутр.</span><b>4. internal wog.ua</b><br>
+    <small>→ лишається у webview (host-матч WebHostRule)</small>
+  </a>
+
+  <a class="case" href="https://httpstat.us/500">
+    <span class="tag open">зовні?</span><b>5. httpstat.us/500 (чужий хост)</b><br>
+    <small>→ чужий хост → eject у Safari (НЕ реальний фейл у цьому webview)</small>
+  </a>
+
+  <p style="margin-top:24px"><small>Перебита навігація (−999): тапни «1», одразу «4» (швидко). Реальний фейл (алерт ТАК): Airplane Mode, або окремо відкрий <code>presentWebView</code> з 500-URL / битим рядком.</small></p>
+</body>
+</html>
