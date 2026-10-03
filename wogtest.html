@@ -5,57 +5,83 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>WOG-517 WebView test</title>
   <style>
-    body { font: 17px -apple-system, system-ui, sans-serif; margin: 0; padding: 24px 20px; line-height: 1.5; color: #1b1b1b; background: #f6f7f5; }
+    body { font: 16px -apple-system, system-ui, sans-serif; margin: 0; padding: 20px 16px 40px; line-height: 1.45; color: #1b1b1b; background: #f6f7f5; }
     h3 { margin: 0 0 4px; }
-    p.sub { margin: 0 0 20px; color: #667; font-size: 14px; }
-    a.case { display: block; padding: 16px 18px; margin: 0 0 12px; background: #fff; border: 1px solid #e2e5e0; border-radius: 12px; text-decoration: none; color: #0a5c2e; }
-    a.case b { color: #1b1b1b; }
-    .tag { display: inline-block; font-size: 12px; font-weight: 600; padding: 2px 8px; border-radius: 6px; margin-right: 8px; }
-    .no  { background: #e6f4ea; color: #137333; }   /* очікуємо: БЕЗ алерта */
-    .stay{ background: #e8f0fe; color: #1a56c4; }    /* очікуємо: лишається */
-    .open{ background: #fef3e0; color: #9a5b00; }    /* очікуємо: відкриє зовні/app */
-    small { color: #889; }
+    p.sub { margin: 0 0 18px; color: #667; font-size: 13px; }
+    .card { background: #fff; border: 1px solid #e2e5e0; border-radius: 12px; padding: 14px 16px; margin: 0 0 14px; }
+    .card a { font-size: 17px; font-weight: 600; color: #0a5c2e; text-decoration: none; }
+    .card.fail a { color: #c5221f; }
+    .exp { margin: 8px 0 0; font-size: 14px; color: #333; }
+    .exp b { color: #000; }
+    .alert-no  { display:inline-block; margin-top:6px; font-size: 13px; font-weight:600; color:#137333; }
+    .alert-yes { display:inline-block; margin-top:6px; font-size: 13px; font-weight:600; color:#c5221f; }
+    .warn { background:#fff6e5; border:1px solid #f0d9a8; border-radius:10px; padding:12px 14px; font-size:13px; color:#664d00; margin:0 0 14px; }
   </style>
 </head>
 <body>
   <h3>WOG-517 · WebView routing test</h3>
-  <p class="sub">Дивись консоль: <code>WEBVIEW_FAIL → …</code>. Для eject-кейсів алерта бути НЕ має.</p>
+  <p class="sub">Тапни кнопку → звір із «Очікувано». Консоль: <code>WEBVIEW_FAIL → …</code></p>
 
-  <a class="case" href="https://t.me/telegram">
-    <span class="tag open">зовні</span><b>1. external http (t.me)</b><br>
-    <small>→ Safari / Telegram, isCancel=true, БЕЗ алерта</small>
-  </a>
+  <div class="warn">⚠️ На <b>симуляторі</b> <code>tel:</code> і <code>viber:</code> можуть не відкритись (нема апок) — краще тестувати на <b>пристрої</b>. Решта працює і на симуляторі.</div>
 
-  <a class="case" href="tel:+380441234567">
-    <span class="tag open">app</span><b>2a. tel:</b><br>
-    <small>→ дзвонилка, БЕЗ алерта</small>
-  </a>
+  <div class="card">
+    <a href="https://t.me/telegram">1. Зовнішній лінк (t.me)</a>
+    <p class="exp"><b>Очікувано:</b> вийде з застосунку → відкриється Telegram або Safari. Повернешся — ця сторінка на місці.</p>
+    <span class="alert-no">Алерт: НІ · у лозі isCancel=true</span>
+  </div>
 
-  <a class="case" href="mailto:test@wog.ua?subject=WOG-517">
-    <span class="tag open">app</span><b>2b. mailto:@wog.ua</b><br>
-    <small>→ пошта (НЕ webview — перевірка host-матчу), БЕЗ алерта</small>
-  </a>
+  <div class="card">
+    <a href="tel:+380441234567">2. tel:</a>
+    <p class="exp"><b>Очікувано:</b> системний діалог дзвінка (на пристрої). Залишаємось у застосунку.</p>
+    <span class="alert-no">Алерт: НІ</span>
+  </div>
 
-  <a class="case" href="viber://chat?number=%2B380441234567">
-    <span class="tag open">app</span><b>2c. viber://</b><br>
-    <small>→ Viber (схема поза LSApplicationQueriesSchemes), БЕЗ алерта</small>
-  </a>
+  <div class="card">
+    <a href="mailto:test@wog.ua?subject=WOG-517">3. mailto:@wog.ua</a>
+    <p class="exp"><b>Очікувано:</b> відкриється пошта/композер. <b>Головне:</b> НЕ відкрилось усередині webview (перевірка host-матчу — хоч у адресі є «wog.ua»).</p>
+    <span class="alert-no">Алерт: НІ</span>
+  </div>
 
-  <a class="case" href="https://www.instagram.com/wog_ukraine/" target="_blank">
-    <span class="tag open">_blank</span><b>3. target=_blank</b><br>
-    <small>→ має відкритись (WKUIDelegate), БЕЗ «тиші»</small>
-  </a>
+  <div class="card">
+    <a href="viber://chat?number=%2B380441234567">4. viber://</a>
+    <p class="exp"><b>Очікувано:</b> відкриється Viber. Якщо Viber не встановлено → тиха вібрація (haptic), без жодного вікна.</p>
+    <span class="alert-no">Алерт: НІ</span>
+  </div>
 
-  <a class="case" href="https://wog.ua/">
-    <span class="tag stay">внутр.</span><b>4. internal wog.ua</b><br>
-    <small>→ лишається у webview (host-матч WebHostRule)</small>
-  </a>
+  <div class="card">
+    <a href="https://prideapp.onelink.me/Ejz3/l986tmc6">5. OneLink (діплінк застосунку)</a>
+    <p class="exp"><b>Очікувано:</b> застосунок сам навігує за діплінком — webview закриється, відкриється відповідний екран WOG (НЕ браузер, НЕ сторінка onelink).</p>
+    <span class="alert-no">Алерт: НІ</span>
+  </div>
 
-  <a class="case" href="https://httpstat.us/500">
-    <span class="tag open">зовні?</span><b>5. httpstat.us/500 (чужий хост)</b><br>
-    <small>→ чужий хост → eject у Safari (НЕ реальний фейл у цьому webview)</small>
-  </a>
+  <div class="card">
+    <a href="https://www.instagram.com/wog_ukraine/" target="_blank">6. target=_blank (нове вікно)</a>
+    <p class="exp"><b>Очікувано:</b> відкриється Instagram/Safari. <b>Головне:</b> тап НЕ має бути «мертвим» (раніше target=_blank нічого не робив).</p>
+    <span class="alert-no">Алерт: НІ</span>
+  </div>
 
-  <p style="margin-top:24px"><small>Перебита навігація (−999): тапни «1», одразу «4» (швидко). Реальний фейл (алерт ТАК): Airplane Mode, або окремо відкрий <code>presentWebView</code> з 500-URL / битим рядком.</small></p>
+  <div class="card">
+    <a href="https://wog.ua/">7. Внутрішній лінк (wog.ua)</a>
+    <p class="exp"><b>Очікувано:</b> сторінка wog.ua завантажиться <b>ВСЕРЕДИНІ цього ж webview</b> (НЕ Safari). Можна свайпнути назад по історії.</p>
+    <span class="alert-no">Алерт: НІ · лишається у webview</span>
+  </div>
+
+  <div class="card">
+    <a href="https://wog.ua/ua/">8. Перебита навігація</a>
+    <p class="exp"><b>Як:</b> тапни ЦЮ кнопку і <b>одразу</b> «7» (або «1») — швидко, поки перша вантажиться. <b>Очікувано:</b> перша навігація скасовується новою, без збою.</p>
+    <span class="alert-no">Алерт: НІ · isCancel=true (code −999)</span>
+  </div>
+
+  <div class="card fail">
+    <a href="https://nope-517-test.wog.ua/">9. Реальний фейл — неіснуючий внутр. хост</a>
+    <p class="exp"><b>Очікувано:</b> хост <code>*.wog.ua</code> → внутрішній → webview <b>намагається</b> завантажити → падає (DNS/cert) → <b>алерт «щось пішло не так» + «OK» закриває webview</b>. Це і є гілка <code>didFailLoading</code>.</p>
+    <span class="alert-yes">Алерт: ТАК · у лозі isCancel=false</span>
+  </div>
+
+  <div class="warn" style="margin-top:20px">
+    <b>Ще два способи реального фейлу (якщо кейс 9 раптом завантажиться через wildcard-DNS):</b><br>
+    • <b>Airplane Mode</b> → відкрити FAQ → стартова сторінка не вантажиться → <b style="color:#c5221f">алерт</b>.<br>
+    • Тимчасово битий URL у <code>showFaq</code> (<code>"not a url"</code>) → <b style="color:#c5221f">алерт одразу</b> (гілка <code>URL(string:)==nil</code>).
+  </div>
 </body>
 </html>
